@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="container">
+        {% include "main/includs/header.html" %}
+
+        <table class="table" style="min-height: calc(100vh - 212px);">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Name</td>
+      <th scope="col">FileName</td>
+      <th scope="col">Image</td>
+      <th scope="col">Text</td>
+      <th scope="col">Project</th>
+      <th scope="col">ID</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in object_list %}
+                <tr>
+                    <td>{{ item.headline_name }}</td>
+                    <td>{{ item.name }}</td>
+                    <td><a href="{{ item.img.url }}">{{ item.img.url }}</a></td>
+                    <td>{{ item.text }}</td>
+                    <td><a href="/media/Ue4Project/{{ item.name }}/{{ item.name }}.html">Project</a></td>
+                    <td>{{ item.id }}</td>
+                    <td>
+                        <form action="/adminPanel/ProjectList/del/" method="POST" id="{{ item.id }}">
+                            {% csrf_token %}
+                            <input type="text" value="{{ item.id }}" readonly="readonly" name="id" style="display: none;">
+                            <input type="submit" value="del" form="{{ item.id }}">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+  </tbody>
+</table>
+    <a href="/adminPanel/ProjectList/add/">add new</a>
+
+        {% include "main/includs/footer.html" %}
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+<script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
+</html>
+
