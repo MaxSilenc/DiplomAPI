@@ -17,6 +17,7 @@ from .serializers import UserSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import re
+from django.db.models import Q
 
 
 def test(request):
@@ -134,17 +135,38 @@ def adminPanelAddUser(request):
 
 
 
+
+
+
+
 @api_view(['GET'])
 def projects(request, pageNumber, theme_id, type):
 
-    if theme_id == 'all' and type == 'all':
-        all_items = Projects.objects.all()
-    elif theme_id == 'all' and type != 'all':
-        all_items = Projects.objects.filter(type=type)
-    elif theme_id != 'all' and type == 'all':
-        all_items = Projects.objects.filter(theme_id=theme_id)
+    if request.GET['search'] == '':
+        if theme_id == 'all' and type == 'all':
+            all_items = Projects.objects.all()
+        elif theme_id == 'all' and type != 'all':
+            all_items = Projects.objects.filter(type=type)
+        elif theme_id != 'all' and type == 'all':
+            all_items = Projects.objects.filter(theme_id=theme_id)
+        else:
+            all_items = Projects.objects.filter(theme_id=theme_id, type=type)
     else:
-        all_items = Projects.objects.filter(theme_id=theme_id, type=type)
+        if theme_id == 'all' and type == 'all':
+            all_items = Projects.objects.filter(Q(headline_name__icontains=request.GET['search']) |
+                                                Q(text__icontains=request.GET['search']))
+        elif theme_id == 'all' and type != 'all':
+            all_items = Projects.objects.filter(Q(type=type) &
+                                                (Q(headline_name__icontains=request.GET['search']) |
+                                                 Q(text__icontains=request.GET['search'])))
+        elif theme_id != 'all' and type == 'all':
+            all_items = Projects.objects.filter(Q(theme_id=theme_id) &
+                                                (Q(headline_name__icontains=request.GET['search']) |
+                                                 Q(text__icontains=request.GET['search'])))
+        else:
+            all_items = Projects.objects.filter(Q(theme_id=theme_id) & Q(type=type) &
+                                                (Q(headline_name__icontains=request.GET['search']) |
+                                                 Q(text__icontains=request.GET['search'])))
 
     page = pageNumber
     projects_paginator = Paginator(all_items, 4)

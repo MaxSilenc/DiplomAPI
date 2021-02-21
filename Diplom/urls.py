@@ -21,7 +21,7 @@ urlpatterns = [
     path('adminPanel/UsersList/', views.adminPanelUsersList),
     path('adminPanel/UsersList/add/', views.adminPanelAddUser),
 
-    path('projects/<int:pageNumber>/<str:theme_id>/<str:type>', views.projects),
+    path('projects/<int:pageNumber>/<str:theme_id>/<str:type>/', views.projects),
     re_path(r'^projectPage/(?P<id>[-\w]+)/$', views.projectPage, name='projectPage'),
     path('authUser/', include(router.urls)),
     path('curr/', views.curr_user),
