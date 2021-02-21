@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     {% load static %}
-    {% load socialaccount %}
-    {% providers_media_js %}
+
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
@@ -88,8 +87,12 @@
   <input type="text" name="text">
   <button type="submit">adfasdf</button>
 </form>
-
-<button><a href="/account/vk/login/?method=js_sdk">vk</a></button>
+<form action="social_reg/" method="post">
+  {% csrf_token %}
+  <input type="text" name="email">
+  <button type="submit">adfasdf</button>
+</form>
+manazmeu21@gmail.com
 </body>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>

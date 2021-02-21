@@ -327,11 +327,13 @@ def reg(request):
         number_re = re.compile(pattern)
 
 
-
         if user is not None:
             return Response({'keyError': 1, 'messages': 'User with this username already exist!'})
         elif request.POST['password'] != request.POST['passwordRep']:
             return Response({'keyError': 2, 'messages': 'Passwords is not equal!'})
+        elif request.POST['email'][-10:] == '@gmail.com':
+            return Response({'keyError': 3, 'messages': 'Your email is linked to google account, '
+                                                        'you can login with Google.'})
         elif email is not None:
             return Response({'keyError': 3, 'messages': 'User with this email already exist!'})
         elif not number_re.findall(request.POST['login']):
@@ -344,6 +346,55 @@ def reg(request):
             new_user.save()
             Token.objects.create(user=new_user)
             return Response({'keyError': 0, 'messages': 'Registered successfully'})
+
+
+@api_view(['POST'])
+def social_reg(request):
+    if request.method == 'POST':
+
+        username = request.POST['email'][:request.POST['email'].find('@')]
+
+        try:
+            user = User.objects.get(username=username)
+        except:
+            user = None
+
+        try:
+            email = User.objects.get(email=request.POST['email'])
+        except:
+            email = None
+
+        if email is not None:
+            user = User.objects.get(email=request.POST['email'])
+            token = Token.objects.get(user=user)
+            return Response({'token': token.key, 'keyError': 0})
+
+        elif user is not None:
+            i = 1
+            while user is not None:
+                try:
+                    user = User.objects.get(username=username + str(i))
+                except:
+                    username = username + str(i)
+                    user = None
+                i = i + 1
+
+            new_user = User()
+            new_user.username = username
+            new_user.email = request.POST['email']
+            new_user.save()
+            Token.objects.create(user=new_user)
+            token = Token.objects.get(user=new_user)
+            return Response({'keyError': 0, 'messages': 'Registered successfully', 'token': token.key})
+
+        else:
+            new_user = User()
+            new_user.username = username
+            new_user.email = request.POST['email']
+            new_user.save()
+            Token.objects.create(user=new_user)
+            token = Token.objects.get(user=new_user)
+            return Response({'keyError': 0, 'messages': 'Registered successfully', 'token': token.key})
 
 
 @api_view(['GET'])

@@ -8,6 +8,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Diplom.urls')),
     path('auth', obtain_auth_token),
-    path('account/', include('allauth.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

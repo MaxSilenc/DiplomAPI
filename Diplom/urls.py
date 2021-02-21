@@ -29,5 +29,6 @@ urlpatterns = [
     path('loginReact/', views.loginReact),
     path('like/', views.like),
     path('reg/', views.reg),
+    path('social_reg/', views.social_reg),
     path('themes/', views.theme),
 ]

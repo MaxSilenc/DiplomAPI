@@ -42,13 +42,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'Diplom',
-
-
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.vk',
-    'allauth.socialaccount.providers.google'
 ]
 
 MIDDLEWARE = [
