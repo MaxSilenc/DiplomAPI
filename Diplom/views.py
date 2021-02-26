@@ -228,6 +228,9 @@ def curr_user(request):
             curr_user = {
                 'login': token.user.username,
                 'email': token.user.email,
+                'userId': token.user.id,
+                'name': token.user.first_name,
+                'lastName': token.user.last_name,
                 'errorKey': 1
             }
             return Response(curr_user)
@@ -332,7 +335,7 @@ def like(request):
             return Response({'keyError': 0, 'message': 'like deleted!'})
 
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
 def reg(request):
     if request.method == 'POST':
         try:
@@ -368,6 +371,51 @@ def reg(request):
             new_user.save()
             Token.objects.create(user=new_user)
             return Response({'keyError': 0, 'messages': 'Registered successfully'})
+
+    if request.method == 'PUT':
+        try:
+            curr_user = User.objects.get(id=request.POST['id'])
+        except:
+            curr_user = None
+
+        if curr_user is not None:
+            if request.POST['login'] != '':
+                try:
+                    user = User.objects.get(username=request.POST['login'])
+                except:
+                    user = None
+
+                if user is not None:
+                    if user.id == request.POST['id']:
+                        return Response({'keyError': 0, 'messages': 'successfully'})
+                    else:
+                        return Response({'keyError': 2, 'messages': 'User with this username already exist!'})
+                else:
+                    curr_user.username = request.POST['login']
+                    curr_user.save()
+            if request.POST['email'] != '':
+                try:
+                    user = User.objects.get(email=request.POST['email'])
+                except:
+                    user = None
+
+                if user is not None:
+                    if user.id == request.POST['id']:
+                        return Response({'keyError': 0, 'messages': 'successfully'})
+                    else:
+                        return Response({'keyError': 3, 'messages': 'User with this email already exist!'})
+                else:
+                    curr_user.email = request.POST['email']
+                    curr_user.save()
+            if request.POST['name'] != '':
+                curr_user.first_name = request.POST['name']
+                curr_user.save()
+            if request.POST['lastName'] != '':
+                curr_user.last_name = request.POST['lastName']
+                curr_user.save()
+            return Response({'keyError': 0, 'messages': 'successfully'})
+        else:
+            return Response({'keyError': 1, 'messages': 'No users with this ID!'})
 
 
 @api_view(['POST'])
