@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from Diplom.models import Projects, Comments, Like, Theme, Type
+from Diplom.models import Projects, Comments, Like, Theme, Type, Message, Chat
 from django.template.context_processors import csrf
 from django.contrib import auth
 from .forms import ProjectsForm, ChangePasswordForm
@@ -487,3 +487,58 @@ def theme(request):
                 'name': item.name
             })
         return Response({'themes': returnArr, 'types': returnArr2})
+
+
+@api_view(['GET', 'PUT', 'POST'])
+def chat(request):
+    if request.method == 'GET':
+        try:
+            chat = Chat.objects.get(username=request.GET['username'])
+        except:
+            chat = None
+
+        if chat is not None:
+            all_items = Message.objects.filter(chat_id=chat.id)
+
+            returnArr = []
+
+            for item in all_items:
+                returnArr.append({
+                    'id': item.id,
+                    'chat_id': item.chat_id,
+                    'text': item.text,
+                    'author': item.author
+                })
+
+            return Response({'chat': {
+                'id': chat.id,
+                'username': chat.username,
+                'adminname': chat.adminname,
+            }, 'messages': returnArr, 'keyError': 0})
+        else:
+            return Response({'keyError': 1, 'messages': 'no chat for this user'})
+
+    elif request.method == 'PUT':
+        old_message = Message.objects.get(id=request.POST['id'])
+        old_message.text = request.POST['text']
+        if old_message.text == '':
+            old_message.delete()
+        else:
+            old_message.save()
+        return Response({'answer': True})
+
+    elif request.method == 'POST':
+        try:
+            chat = Chat.objects.get(id=request.POST['chatId'])
+        except:
+            chat = None
+
+        if chat is None:
+            chat = Chat.objects.create(username=request.POST['username'])
+
+        new_message = Message()
+        new_message.chat_id = chat.id
+        new_message.text = request.POST['text']
+        new_message.author = request.POST['username']
+        new_message.save()
+        return Response({'keyError': 0, 'messages': 'successfully'})

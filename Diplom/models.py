@@ -21,6 +21,12 @@ class Comments(models.Model):
     text = models.TextField()
 
 
+class Message(models.Model):
+    author = models.CharField(max_length=30)
+    chat_id = models.CharField(max_length=20)
+    text = models.TextField()
+
+
 class Like(models.Model):
     author = models.CharField(max_length=30)
     project_id = models.CharField(max_length=20)
@@ -33,3 +39,8 @@ class Theme(models.Model):
 
 class Type(models.Model):
     name = models.CharField(max_length=30)
+
+
+class Chat(models.Model):
+    username = models.CharField(max_length=30)
+    adminname = models.CharField(max_length=30)
