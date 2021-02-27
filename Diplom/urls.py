@@ -32,4 +32,5 @@ urlpatterns = [
     path('social_reg/', views.social_reg),
     path('themes/', views.theme),
     path('chat/', views.chat),
+    path('projectInWork/', views.project_in_work),
 ]

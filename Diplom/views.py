@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from Diplom.models import Projects, Comments, Like, Theme, Type, Message, Chat
+from Diplom.models import Projects, Comments, Like, Theme, Type, Message, Chat, ProjectInWork
 from django.template.context_processors import csrf
 from django.contrib import auth
 from .forms import ProjectsForm, ChangePasswordForm
@@ -144,29 +144,29 @@ def projects(request, pageNumber, theme_id, type):
 
     if request.GET['search'] == '':
         if theme_id == 'all' and type == 'all':
-            all_items = Projects.objects.all()
+            all_items = Projects.objects.filter(in_work=False)
         elif theme_id == 'all' and type != 'all':
-            all_items = Projects.objects.filter(type=type)
+            all_items = Projects.objects.filter(type=type, in_work=False)
         elif theme_id != 'all' and type == 'all':
-            all_items = Projects.objects.filter(theme_id=theme_id)
+            all_items = Projects.objects.filter(theme_id=theme_id, in_work=False)
         else:
-            all_items = Projects.objects.filter(theme_id=theme_id, type=type)
+            all_items = Projects.objects.filter(theme_id=theme_id, type=type, in_work=False)
     else:
         if theme_id == 'all' and type == 'all':
             all_items = Projects.objects.filter(Q(headline_name__icontains=request.GET['search']) |
-                                                Q(text__icontains=request.GET['search']))
+                                                Q(text__icontains=request.GET['search']), in_work=False)
         elif theme_id == 'all' and type != 'all':
             all_items = Projects.objects.filter(Q(type=type) &
                                                 (Q(headline_name__icontains=request.GET['search']) |
-                                                 Q(text__icontains=request.GET['search'])))
+                                                 Q(text__icontains=request.GET['search'])), in_work=False)
         elif theme_id != 'all' and type == 'all':
             all_items = Projects.objects.filter(Q(theme_id=theme_id) &
                                                 (Q(headline_name__icontains=request.GET['search']) |
-                                                 Q(text__icontains=request.GET['search'])))
+                                                 Q(text__icontains=request.GET['search'])), in_work=False)
         else:
             all_items = Projects.objects.filter(Q(theme_id=theme_id) & Q(type=type) &
                                                 (Q(headline_name__icontains=request.GET['search']) |
-                                                 Q(text__icontains=request.GET['search'])))
+                                                 Q(text__icontains=request.GET['search'])), in_work=False)
 
     page = pageNumber
     projects_paginator = Paginator(all_items, 4)
@@ -542,3 +542,29 @@ def chat(request):
         new_message.author = request.POST['username']
         new_message.save()
         return Response({'keyError': 0, 'messages': 'successfully'})
+
+
+@api_view(['GET'])
+def project_in_work(request):
+    try:
+        projects_in_work = ProjectInWork.objects.filter(user_id=request.GET['user_id'])
+    except:
+        projects_in_work = None
+
+    if projects_in_work is not None:
+        projects_arr = []
+        for item in projects_in_work:
+            project = Projects.objects.get(id=item.project_id)
+            projects_arr.append({
+                'id': project.id,
+                'title': project.headline_name,
+                'text': project.text,
+                'directLink': 'theme1',
+                'img': project.img.url,
+                'img2': project.img2.url,
+                'img3': project.img3.url,
+                'name': project.name
+            })
+        return Response({'keyError': 0, 'messages': 'successfully', 'projects': projects_arr})
+    else:
+        return Response({'keyError': 1, 'messages': 'no projects!'})

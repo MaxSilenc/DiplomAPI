@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7371c2d1-2261-4424-9918-7cb287a995de" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Diplom/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Diplom/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Diplom/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Diplom/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Diplom/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Diplom/urls.py" afterDir="false" />
@@ -15,12 +16,12 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Diplom/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="801">
-              <caret line="542" column="25" selection-start-line="542" selection-start-column="25" selection-end-line="542" selection-end-column="25" />
+            <state relative-caret-position="657">
+              <caret line="559" column="47" lean-forward="true" selection-start-line="559" selection-start-column="47" selection-end-line="559" selection-end-column="47" />
               <folding>
                 <element signature="e#0#45#0" expanded="true" />
               </folding>
@@ -31,8 +32,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Diplom/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="528">
-              <caret line="33" lean-forward="true" selection-start-line="33" selection-end-line="33" />
+            <state relative-caret-position="160">
+              <caret line="13" column="48" lean-forward="true" selection-start-line="13" selection-start-column="48" selection-end-line="13" selection-end-column="48" />
             </state>
           </provider>
         </entry>
@@ -40,8 +41,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Diplom/admin.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
-              <caret line="11" column="25" lean-forward="true" selection-start-line="11" selection-start-column="25" selection-end-line="11" selection-end-column="25" />
+            <state relative-caret-position="208">
+              <caret line="13" column="26" lean-forward="true" selection-start-line="13" selection-start-column="26" selection-end-line="13" selection-end-column="26" />
               <folding>
                 <element signature="e#0#34#0" expanded="true" />
               </folding>
@@ -52,8 +53,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Diplom/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="480">
-              <caret line="30" column="28" lean-forward="true" selection-start-line="30" selection-start-column="28" selection-end-line="30" selection-end-column="28" />
+            <state relative-caret-position="544">
+              <caret line="34" column="24" selection-start-line="34" selection-start-column="10" selection-end-line="34" selection-end-column="24" />
               <folding>
                 <element signature="e#0#37#0" expanded="true" />
               </folding>
@@ -69,8 +70,8 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Diplom/models.py" />
         <option value="$PROJECT_DIR$/Diplom/admin.py" />
+        <option value="$PROJECT_DIR$/Diplom/models.py" />
         <option value="$PROJECT_DIR$/Diplom/urls.py" />
         <option value="$PROJECT_DIR$/Diplom/views.py" />
       </list>
@@ -170,20 +171,21 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1614331880037</updated>
-      <workItem from="1614331897446" duration="8326000" />
+      <workItem from="1614331897446" duration="8594000" />
+      <workItem from="1614423129369" duration="5490000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8326000" />
+    <option name="totallyTimeSpent" value="14084000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25266525" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Docker" order="0" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="1" />
       <window_info anchor="bottom" id="Version Control" order="2" />
@@ -213,8 +215,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Diplom/admin.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="11" column="25" lean-forward="true" selection-start-line="11" selection-start-column="25" selection-end-line="11" selection-end-column="25" />
+        <state relative-caret-position="208">
+          <caret line="13" column="26" lean-forward="true" selection-start-line="13" selection-start-column="26" selection-end-line="13" selection-end-column="26" />
           <folding>
             <element signature="e#0#34#0" expanded="true" />
           </folding>
@@ -223,15 +225,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Diplom/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="33" lean-forward="true" selection-start-line="33" selection-end-line="33" />
+        <state relative-caret-position="160">
+          <caret line="13" column="48" lean-forward="true" selection-start-line="13" selection-start-column="48" selection-end-line="13" selection-end-column="48" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Diplom/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="30" column="28" lean-forward="true" selection-start-line="30" selection-start-column="28" selection-end-line="30" selection-end-column="28" />
+        <state relative-caret-position="544">
+          <caret line="34" column="24" selection-start-line="34" selection-start-column="10" selection-end-line="34" selection-end-column="24" />
           <folding>
             <element signature="e#0#37#0" expanded="true" />
           </folding>
@@ -240,8 +242,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Diplom/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="801">
-          <caret line="542" column="25" selection-start-line="542" selection-start-column="25" selection-end-line="542" selection-end-column="25" />
+        <state relative-caret-position="657">
+          <caret line="559" column="47" lean-forward="true" selection-start-line="559" selection-start-column="47" selection-end-line="559" selection-end-column="47" />
           <folding>
             <element signature="e#0#45#0" expanded="true" />
           </folding>
