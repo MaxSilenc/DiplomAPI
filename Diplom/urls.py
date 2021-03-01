@@ -33,4 +33,5 @@ urlpatterns = [
     path('themes/', views.theme),
     path('chat/', views.chat),
     path('projectInWork/', views.project_in_work),
+    path('emptyChats/', views.empty_chats),
 ]

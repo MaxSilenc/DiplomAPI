@@ -231,6 +231,7 @@ def curr_user(request):
                 'userId': token.user.id,
                 'name': token.user.first_name,
                 'lastName': token.user.last_name,
+                'status': token.user.is_staff,
                 'errorKey': 1
             }
             return Response(curr_user)
@@ -534,7 +535,7 @@ def chat(request):
             chat = None
 
         if chat is None:
-            chat = Chat.objects.create(username=request.POST['username'])
+            chat = Chat.objects.create(username=request.POST['username'], adminname='None')
 
         new_message = Message()
         new_message.chat_id = chat.id
@@ -568,3 +569,28 @@ def project_in_work(request):
         return Response({'keyError': 0, 'messages': 'successfully', 'projects': projects_arr})
     else:
         return Response({'keyError': 1, 'messages': 'no projects!'})
+
+
+@api_view(['GET', 'PUT'])
+def empty_chats(request):
+    if request.method == 'GET':
+        try:
+            chats = Chat.objects.filter(adminname='None')
+        except:
+            chats = None
+
+        if chats is not None:
+            arr = []
+            for item in chats:
+                arr.append({
+                    'id': item.id,
+                    'user': item.username
+                })
+            return Response({'keyError': 0, 'messages': 'successfully', 'chats': arr})
+        else:
+            return Response({'keyError': 1, 'messages': 'no such chats!'})
+    if request.method == 'PUT':
+        chat = Chat.objects.get(id=request.POST['id'])
+        chat.adminname = request.POST['adminname']
+        chat.save()
+        return Response({'keyError': 0, 'messages': 'added admin!'})
