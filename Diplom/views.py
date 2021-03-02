@@ -529,6 +529,9 @@ def chat(request):
         return Response({'answer': True})
 
     elif request.method == 'POST':
+        if request.POST['chatId'] == 'undefined':
+            return Response({'keyError': 2, 'messages': 'something going wrong!'})
+
         try:
             chat = Chat.objects.get(id=request.POST['chatId'])
         except:
@@ -575,7 +578,7 @@ def project_in_work(request):
 def empty_chats(request):
     if request.method == 'GET':
         try:
-            chats = Chat.objects.filter(adminname='None')
+            chats = Chat.objects.filter(adminname=request.GET['adminname'])
         except:
             chats = None
 
@@ -594,3 +597,6 @@ def empty_chats(request):
         chat.adminname = request.POST['adminname']
         chat.save()
         return Response({'keyError': 0, 'messages': 'added admin!'})
+
+
+
