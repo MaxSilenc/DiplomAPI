@@ -18,6 +18,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import re
 from django.db.models import Q
+from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
+from rest_framework.views import APIView
+from rest_framework import serializers
 
 
 def test(request):
@@ -134,68 +137,127 @@ def adminPanelAddUser(request):
 
 
 
-
-
-
-
-
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def projects(request, pageNumber, theme_id, type):
 
-    if request.GET['search'] == '':
-        if theme_id == 'all' and type == 'all':
-            all_items = Projects.objects.filter(in_work=False)
-        elif theme_id == 'all' and type != 'all':
-            all_items = Projects.objects.filter(type=type, in_work=False)
-        elif theme_id != 'all' and type == 'all':
-            all_items = Projects.objects.filter(theme_id=theme_id, in_work=False)
+    if request.method == 'GET':
+        if request.GET['search'] == '':
+            if theme_id == 'all' and type == 'all':
+                all_items = Projects.objects.filter(in_work=False)
+            elif theme_id == 'all' and type != 'all':
+                all_items = Projects.objects.filter(type=type, in_work=False)
+            elif theme_id != 'all' and type == 'all':
+                all_items = Projects.objects.filter(theme_id=theme_id, in_work=False)
+            else:
+                all_items = Projects.objects.filter(theme_id=theme_id, type=type, in_work=False)
         else:
-            all_items = Projects.objects.filter(theme_id=theme_id, type=type, in_work=False)
-    else:
-        if theme_id == 'all' and type == 'all':
-            all_items = Projects.objects.filter(Q(headline_name__icontains=request.GET['search']) |
-                                                Q(text__icontains=request.GET['search']), in_work=False)
-        elif theme_id == 'all' and type != 'all':
-            all_items = Projects.objects.filter(Q(type=type) &
-                                                (Q(headline_name__icontains=request.GET['search']) |
-                                                 Q(text__icontains=request.GET['search'])), in_work=False)
-        elif theme_id != 'all' and type == 'all':
-            all_items = Projects.objects.filter(Q(theme_id=theme_id) &
-                                                (Q(headline_name__icontains=request.GET['search']) |
-                                                 Q(text__icontains=request.GET['search'])), in_work=False)
+            if theme_id == 'all' and type == 'all':
+                all_items = Projects.objects.filter(Q(headline_name__icontains=request.GET['search']) |
+                                                    Q(text__icontains=request.GET['search']), in_work=False)
+            elif theme_id == 'all' and type != 'all':
+                all_items = Projects.objects.filter(Q(type=type) &
+                                                    (Q(headline_name__icontains=request.GET['search']) |
+                                                     Q(text__icontains=request.GET['search'])), in_work=False)
+            elif theme_id != 'all' and type == 'all':
+                all_items = Projects.objects.filter(Q(theme_id=theme_id) &
+                                                    (Q(headline_name__icontains=request.GET['search']) |
+                                                     Q(text__icontains=request.GET['search'])), in_work=False)
+            else:
+                all_items = Projects.objects.filter(Q(theme_id=theme_id) & Q(type=type) &
+                                                    (Q(headline_name__icontains=request.GET['search']) |
+                                                     Q(text__icontains=request.GET['search'])), in_work=False)
+
+        page = pageNumber
+        projects_paginator = Paginator(all_items, 4)
+
+        if page == 0:
+            projects = Projects.objects.all()
         else:
-            all_items = Projects.objects.filter(Q(theme_id=theme_id) & Q(type=type) &
-                                                (Q(headline_name__icontains=request.GET['search']) |
-                                                 Q(text__icontains=request.GET['search'])), in_work=False)
+            try:
+                projects = projects_paginator.page(page)
+            except PageNotAnInteger:
+                projects = projects_paginator.page(4)
+            except EmptyPage:
+                projects = projects_paginator.page(projects_paginator.num_pages)
 
-    page = pageNumber
-    projects_paginator = Paginator(all_items, 4)
+        returnArr = []
 
-    try:
-        projects = projects_paginator.page(page)
-    except PageNotAnInteger:
-        projects = projects_paginator.page(4)
-    except EmptyPage:
-        projects = projects_paginator.page(projects_paginator.num_pages)
+        for item in projects:
+            returnArr.append({
+                'id': item.id,
+                'title': item.headline_name,
+                'text': item.text,
+                'directLink': 'theme1',
+                'img': item.img.url,
+                'img2': item.img2.url,
+                'img3': item.img3.url,
+                'name': item.name,
+                'work': item.in_work
+            })
 
-    returnArr = []
+        project = {
+            "items": returnArr,
+            "page": page,
+            "count": len(all_items)
+        }
+        return Response(project)
 
-    for item in projects:
-        returnArr.append({
-            'id': item.id,
-            'title': item.headline_name,
-            'text': item.text,
-            'directLink': 'theme1',
-            'img': item.img.url,
-            'name': item.name
-        })
+    parser_classes = (MultiPartParser, FormParser)
+    if request.method == 'POST':
 
-    project = {
-        "items": returnArr,
-        "page": page,
-        "count": len(all_items)
-    }
-    return Response(project)
+        try:
+            some_name = Projects.objects.get(headline_name=request.POST['headline_name'])
+        except:
+            some_name = None
+
+        try:
+            some_theme = Theme.objects.get(name=request.POST['theme_id'])
+        except:
+            some_theme = None
+
+        try:
+            some_type = Type.objects.get(name=request.POST['type'])
+        except:
+            some_type = None
+
+
+        if some_name is not None:
+            return Response({'keyError': 1, 'message': 'Project with this headline name already exist!'})
+        if some_theme is None:
+            return Response({'keyError': 2, 'message': 'No such themes, you need to add new theme with this name!'})
+        if some_type is None:
+            return Response({'keyError': 3, 'message': 'No such type, you need to add new type with this name!'})
+
+
+        new_project = Projects()
+        new_project.headline_name = request.POST['headline_name']
+        new_project.name = request.POST['name']
+        new_project.img = 'img/' + request.FILES['img'].name
+        new_project.img2 = 'img/' + request.FILES['img2'].name
+        new_project.img3 = 'img/' + request.FILES['img3'].name
+        new_project.text = request.POST['text']
+        new_project.theme_id = request.POST['theme_id']
+        new_project.type = request.POST['type']
+        if request.POST['in_work'] == 0:
+            new_project.in_work = False
+        else:
+            new_project.in_work = True
+
+        FileSystemStorage().save('img/' + request.FILES['img'].name, request.FILES['img'])
+        FileSystemStorage().save('img/' + request.FILES['img2'].name, request.FILES['img2'])
+        FileSystemStorage().save('img/' + request.FILES['img3'].name, request.FILES['img3'])
+        myfile = request.FILES.getlist('project')
+        fs = FileSystemStorage()
+        for item in myfile:
+            filename = fs.save('Ue4Project/' + request.POST['name'] + '/' + item.name, item)
+        fs.delete(myfile[-1].name)
+        new_project.save()
+
+        return Response({'keyError': 0, 'message': 'Nice!'})
+
+
+
+
 
 
 def projectPage(request, id):
