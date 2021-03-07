@@ -220,6 +220,11 @@ def projects(request, pageNumber, theme_id, type):
         except:
             some_type = None
 
+        try:
+            some_file = Projects.objects.get(name=request.POST['name'])
+        except:
+            some_file = None
+
 
         if some_name is not None:
             return Response({'keyError': 1, 'message': 'Project with this headline name already exist!'})
@@ -227,6 +232,8 @@ def projects(request, pageNumber, theme_id, type):
             return Response({'keyError': 2, 'message': 'No such themes, you need to add new theme with this name!'})
         if some_type is None:
             return Response({'keyError': 3, 'message': 'No such type, you need to add new type with this name!'})
+        if some_file is not None:
+            return Response({'keyError': 4, 'message': 'Project with this file name already exist!'})
 
 
         new_project = Projects()
@@ -238,7 +245,7 @@ def projects(request, pageNumber, theme_id, type):
         new_project.text = request.POST['text']
         new_project.theme_id = request.POST['theme_id']
         new_project.type = request.POST['type']
-        if request.POST['in_work'] == 0:
+        if request.POST['in_work'] == '0':
             new_project.in_work = False
         else:
             new_project.in_work = True
@@ -253,7 +260,21 @@ def projects(request, pageNumber, theme_id, type):
         fs.delete(myfile[-1].name)
         new_project.save()
 
-        return Response({'keyError': 0, 'message': 'Nice!'})
+
+
+        return Response({'keyError': 0, 'message': 'Nice!', 'project': {
+
+                'id': new_project.id,
+                'title': new_project.headline_name,
+                'text': new_project.text,
+                'directLink': 'theme1',
+                'img': new_project.img.url,
+                'img2': new_project.img2.url,
+                'img3': new_project.img3.url,
+                'name': new_project.name,
+                'work': new_project.in_work
+
+        }})
 
 
 
