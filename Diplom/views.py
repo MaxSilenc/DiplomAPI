@@ -551,7 +551,7 @@ def social_reg(request):
             return Response({'keyError': 0, 'messages': 'Registered successfully', 'token': token.key})
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST', 'PUT'])
 def theme(request):
     if request.method == 'GET':
         themes = Theme.objects.all()
@@ -571,6 +571,69 @@ def theme(request):
                 'name': item.name
             })
         return Response({'themes': returnArr, 'types': returnArr2})
+
+    if request.method == 'POST':
+        if request.POST['typesOrThemes'] == 'types':
+            try:
+                some_type = Type.objects.get(name=request.POST['name'])
+            except:
+                some_type = None
+
+            if some_type is None:
+                newType = Type()
+                newType.name = request.POST['name']
+                newType.save()
+                return Response({'keyError': 0, 'message': 'type', 'new': {
+                    'id': newType.id,
+                    'name': newType.name,
+                }})
+            else:
+                return Response({'keyError': 1, 'message': 'Type with this name already exist!'})
+
+        if request.POST['typesOrThemes'] == 'themes':
+            try:
+                some_theme = Theme.objects.get(name=request.POST['name'])
+            except:
+                some_theme = None
+
+            if some_theme is None:
+                newtheme = Theme()
+                newtheme.name = request.POST['name']
+                newtheme.save()
+                return Response({'keyError': 0, 'message': 'theme', 'new': {
+                    'id': newtheme.id,
+                    'name': newtheme.name,
+                }})
+            else:
+                return Response({'keyError': 2, 'message': 'Theme with this name already exist!'})
+
+    if request.method == 'PUT':
+        if request.POST['typesOrThemes'] == 'types':
+            updateType = Type.objects.get(id=request.POST['id'])
+
+            if request.POST['newName'] == '':
+                updateType.delete()
+                return Response({'keyError': 1, 'message': 'type'})
+            else:
+                updateType.name = request.POST['newName']
+                updateType.save()
+                return Response({'keyError': 0, 'message': 'type', 'new': {
+                    'id': updateType.id,
+                    'name': updateType.name,
+                }})
+        if request.POST['typesOrThemes'] == 'themes':
+            updateTheme = Theme.objects.get(id=request.POST['id'])
+
+            if request.POST['newName'] == '':
+                updateTheme.delete()
+                return Response({'keyError': 1, 'message': 'theme'})
+            else:
+                updateTheme.name = request.POST['newName']
+                updateTheme.save()
+                return Response({'keyError': 0, 'message': 'theme', 'new': {
+                    'id': updateTheme.id,
+                    'name': updateTheme.name,
+                }})
 
 
 @api_view(['GET', 'PUT', 'POST'])
