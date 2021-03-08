@@ -155,31 +155,48 @@ def adminPanelAddUser(request):
 def projects(request, pageNumber, theme_id, type):
 
     if request.method == 'GET':
-        if request.GET['search'] == '':
-            if theme_id == 'all' and type == 'all':
-                all_items = Projects.objects.filter(in_work=False)
-            elif theme_id == 'all' and type != 'all':
-                all_items = Projects.objects.filter(type=type, in_work=False)
-            elif theme_id != 'all' and type == 'all':
-                all_items = Projects.objects.filter(theme_id=theme_id, in_work=False)
+        if request.GET['inWork'] == '0':
+            if request.GET['search'] == '':
+                if theme_id == 'all' and type == 'all':
+                    all_items = Projects.objects.filter(in_work=False)
+                elif theme_id == 'all' and type != 'all':
+                    all_items = Projects.objects.filter(type=type, in_work=False)
+                elif theme_id != 'all' and type == 'all':
+                    all_items = Projects.objects.filter(theme_id=theme_id, in_work=False)
+                else:
+                    all_items = Projects.objects.filter(theme_id=theme_id, type=type, in_work=False)
             else:
-                all_items = Projects.objects.filter(theme_id=theme_id, type=type, in_work=False)
+                if theme_id == 'all' and type == 'all':
+                    all_items = Projects.objects.filter(Q(headline_name__icontains=request.GET['search']) |
+                                                        Q(text__icontains=request.GET['search']), in_work=False)
+                elif theme_id == 'all' and type != 'all':
+                    all_items = Projects.objects.filter(Q(type=type) &
+                                                        (Q(headline_name__icontains=request.GET['search']) |
+                                                         Q(text__icontains=request.GET['search'])), in_work=False)
+                elif theme_id != 'all' and type == 'all':
+                    all_items = Projects.objects.filter(Q(theme_id=theme_id) &
+                                                        (Q(headline_name__icontains=request.GET['search']) |
+                                                         Q(text__icontains=request.GET['search'])), in_work=False)
+                else:
+                    all_items = Projects.objects.filter(Q(theme_id=theme_id) & Q(type=type) &
+                                                        (Q(headline_name__icontains=request.GET['search']) |
+                                                         Q(text__icontains=request.GET['search'])), in_work=False)
         else:
             if theme_id == 'all' and type == 'all':
                 all_items = Projects.objects.filter(Q(headline_name__icontains=request.GET['search']) |
-                                                    Q(text__icontains=request.GET['search']), in_work=False)
+                                                    Q(text__icontains=request.GET['search']))
             elif theme_id == 'all' and type != 'all':
                 all_items = Projects.objects.filter(Q(type=type) &
                                                     (Q(headline_name__icontains=request.GET['search']) |
-                                                     Q(text__icontains=request.GET['search'])), in_work=False)
+                                                     Q(text__icontains=request.GET['search'])))
             elif theme_id != 'all' and type == 'all':
                 all_items = Projects.objects.filter(Q(theme_id=theme_id) &
                                                     (Q(headline_name__icontains=request.GET['search']) |
-                                                     Q(text__icontains=request.GET['search'])), in_work=False)
+                                                     Q(text__icontains=request.GET['search'])))
             else:
                 all_items = Projects.objects.filter(Q(theme_id=theme_id) & Q(type=type) &
                                                     (Q(headline_name__icontains=request.GET['search']) |
-                                                     Q(text__icontains=request.GET['search'])), in_work=False)
+                                                     Q(text__icontains=request.GET['search'])))
 
         page = pageNumber
         projects_paginator = Paginator(all_items, 4)
@@ -206,7 +223,7 @@ def projects(request, pageNumber, theme_id, type):
                 'img2': item.img2.url,
                 'img3': item.img3.url,
                 'name': item.name,
-                'work': item.in_work
+                'work': item.in_work,
             })
 
         project = {
@@ -271,6 +288,19 @@ def projects(request, pageNumber, theme_id, type):
         fs.delete(myfile[-1].name)
         new_project.save()
 
+        if new_project.in_work == True:
+            new_project_in_work = ProjectInWork()
+            new_project_in_work.project_id = new_project.id
+            try:
+                user = User.objects.get(username=request.POST['username'])
+            except:
+                user = None
+            if user is not None:
+                new_project_in_work.user_id = user.id
+                new_project_in_work.save()
+            else:
+                return Response({'keyError': 5, 'message': 'No users with such username'})
+
         return Response({'keyError': 0, 'message': 'Nice!', 'project': {
 
                 'id': new_project.id,
@@ -288,6 +318,16 @@ def projects(request, pageNumber, theme_id, type):
     if request.method == 'PUT':
         if request.POST['whatToDo'] == 'delete':
             project = Projects.objects.get(id=request.POST['id'])
+            comments = Comments.objects.filter(project_id=request.POST['id'])
+            likes = Like.objects.filter(project_id=request.POST['id'])
+            project_in_work = ProjectInWork.objects.filter(project_id=request.POST['id'])
+            for item in project_in_work:
+                item.delete()
+            for item in likes:
+                item.delete()
+            for item in comments:
+                item.delete()
+
             project.delete()
             FileSystemStorage().delete('img/' + project.img.url[11:])
             FileSystemStorage().delete('img/' + project.img2.url[11:])
@@ -299,12 +339,129 @@ def projects(request, pageNumber, theme_id, type):
 
             FileSystemStorage().delete('Ue4Project/' + project.name)
             return Response({'keyError': 0, 'message': 'Nice!'})
+        if request.POST['whatToDo'] == 'update':
+
+            update_project = Projects.objects.get(id=request.POST['id'])
+
+            try:
+                some_name = Projects.objects.get(headline_name=request.POST['headline_name'])
+            except:
+                some_name = None
+
+            try:
+                some_theme = Theme.objects.get(name=request.POST['theme_id'])
+            except:
+                some_theme = None
+
+            try:
+                some_type = Type.objects.get(name=request.POST['type'])
+            except:
+                some_type = None
+
+            try:
+                some_file = Projects.objects.get(name=request.POST['name'])
+            except:
+                some_file = None
+
+            if (some_name is not None) and (update_project.headline_name != some_name.headline_name):
+                return Response({'keyError': 1, 'message': 'Project with this headline name already exist!'})
+            if some_theme is None:
+                return Response({'keyError': 2, 'message': 'No such themes, you need to add new theme with this name!'})
+            if some_type is None:
+                return Response({'keyError': 3, 'message': 'No such type, you need to add new type with this name!'})
+            if (some_file is not None) and (update_project.name != some_file.name):
+                return Response({'keyError': 4, 'message': 'Project with this file name already exist!'})
+
+            update_project.headline_name = request.POST['headline_name']
+            update_project.name = request.POST['name']
+            try:
+                img = request.POST['img']
+            except:
+                img = None
+
+            try:
+                img2 = request.POST['img2']
+            except:
+                img2 = None
+
+            try:
+                img3 = request.POST['img3']
+            except:
+                img3 = None
+
+            if img is None:
+                FileSystemStorage().delete('img/' + update_project.img.url[11:])
+                update_project.img = FileSystemStorage().save('img/' + request.FILES['img'].name, request.FILES['img'])
+
+            if img2 is None:
+                FileSystemStorage().delete('img/' + update_project.img2.url[11:])
+                update_project.img2 = FileSystemStorage().save('img/' + request.FILES['img2'].name, request.FILES['img2'])
+
+            if img3 is None:
+                FileSystemStorage().delete('img/' + update_project.img3.url[11:])
+                update_project.img3 = FileSystemStorage().save('img/' + request.FILES['img3'].name, request.FILES['img3'])
+
+
+            update_project.text = request.POST['text']
+            update_project.theme_id = request.POST['theme_id']
+            update_project.type = request.POST['type']
+            if request.POST['in_work'] == '0':
+                update_project.in_work = False
+                try:
+                    project_in_work = ProjectInWork.objects.get(project_id=update_project.id)
+                except:
+                    project_in_work = None
+
+                if project_in_work is not None:
+                    project_in_work.delete()
+            else:
+                if update_project.in_work == True:
+                    update_project.in_work = True
+                else:
+                    try:
+                        user = User.objects.get(username=request.POST['username'])
+                    except:
+                        user = None
+
+                    if user is None:
+                        return Response({'keyError': 5, 'message': 'No such users with this name!'})
+                    else:
+                        new_project_in_work = ProjectInWork()
+                        new_project_in_work.user_id = user.id
+                        new_project_in_work.project_id = update_project.id
+                        new_project_in_work.save()
+                        update_project.in_work = True
+
+            try:
+                newProj = request.POST['project']
+            except:
+                newProj = None
+
+            if newProj is None:
+                arr_files = FileSystemStorage().listdir('Ue4Project/' + update_project.name + '/')[1]
+                for item in arr_files:
+                    FileSystemStorage().delete('Ue4Project/' + update_project.name + '/' + item)
+                FileSystemStorage().delete('Ue4Project/' + update_project.name)
+
+                myfile = request.FILES.getlist('project')
+                fs = FileSystemStorage()
+                for item in myfile:
+                    filename = fs.save('Ue4Project/' + request.POST['name'] + '/' + item.name, item)
+                fs.delete(myfile[-1].name)
+
+            update_project.save()
+            return Response({
+                'update': True
+            })
 
 
 
-
+@api_view(['GET'])
 def projectPage(request, id):
     project = Projects.objects.get(id=id)
+    username = ''
+    if project.in_work == True:
+        username = User.objects.get(id=ProjectInWork.objects.get(project_id=id).user_id).username
 
     projectJson = {
         'id': project.id,
@@ -312,9 +469,15 @@ def projectPage(request, id):
         'text': project.text,
         'directLink': 'theme1',
         'img': project.img.url,
-        'name': project.name
+        'img2': project.img2.url,
+        'img3': project.img3.url,
+        'name': project.name,
+        'work': project.in_work,
+        'theme': project.theme_id,
+        'type': project.type,
+        'username': username,
     }
-    return JsonResponse(projectJson)
+    return Response(projectJson)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -413,7 +576,7 @@ def like(request):
             like = Like.objects.get(project_id=request.GET['pr_id'], author=request.GET['author'])
         except:
             like = None
-        likes_count = len(Like.objects.all())
+        likes_count = len(Like.objects.filter(project_id=request.GET['pr_id']))
         if like is not None:
             return Response({
                 'keyError': 0,
