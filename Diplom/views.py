@@ -137,7 +137,21 @@ def adminPanelAddUser(request):
 
 
 
-@api_view(['GET', 'POST'])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@api_view(['GET', 'POST', 'PUT'])
 def projects(request, pageNumber, theme_id, type):
 
     if request.method == 'GET':
@@ -239,9 +253,9 @@ def projects(request, pageNumber, theme_id, type):
         new_project = Projects()
         new_project.headline_name = request.POST['headline_name']
         new_project.name = request.POST['name']
-        new_project.img = 'img/' + request.FILES['img'].name
-        new_project.img2 = 'img/' + request.FILES['img2'].name
-        new_project.img3 = 'img/' + request.FILES['img3'].name
+        new_project.img = FileSystemStorage().save('img/' + request.FILES['img'].name, request.FILES['img'])
+        new_project.img2 = FileSystemStorage().save('img/' + request.FILES['img2'].name, request.FILES['img2'])
+        new_project.img3 = FileSystemStorage().save('img/' + request.FILES['img3'].name, request.FILES['img3'])
         new_project.text = request.POST['text']
         new_project.theme_id = request.POST['theme_id']
         new_project.type = request.POST['type']
@@ -250,17 +264,12 @@ def projects(request, pageNumber, theme_id, type):
         else:
             new_project.in_work = True
 
-        FileSystemStorage().save('img/' + request.FILES['img'].name, request.FILES['img'])
-        FileSystemStorage().save('img/' + request.FILES['img2'].name, request.FILES['img2'])
-        FileSystemStorage().save('img/' + request.FILES['img3'].name, request.FILES['img3'])
         myfile = request.FILES.getlist('project')
         fs = FileSystemStorage()
         for item in myfile:
             filename = fs.save('Ue4Project/' + request.POST['name'] + '/' + item.name, item)
         fs.delete(myfile[-1].name)
         new_project.save()
-
-
 
         return Response({'keyError': 0, 'message': 'Nice!', 'project': {
 
@@ -276,7 +285,20 @@ def projects(request, pageNumber, theme_id, type):
 
         }})
 
+    if request.method == 'PUT':
+        if request.POST['whatToDo'] == 'delete':
+            project = Projects.objects.get(id=request.POST['id'])
+            project.delete()
+            FileSystemStorage().delete('img/' + project.img.url[11:])
+            FileSystemStorage().delete('img/' + project.img2.url[11:])
+            FileSystemStorage().delete('img/' + project.img3.url[11:])
 
+            arr_files = FileSystemStorage().listdir('Ue4Project/' + project.name + '/')[1]
+            for item in arr_files:
+                FileSystemStorage().delete('Ue4Project/' + project.name + '/' + item)
+
+            FileSystemStorage().delete('Ue4Project/' + project.name)
+            return Response({'keyError': 0, 'message': 'Nice!'})
 
 
 

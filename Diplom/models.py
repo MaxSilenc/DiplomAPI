@@ -13,10 +13,6 @@ class Projects(models.Model):
     type = models.CharField(max_length=20, default=1)
     in_work = models.BooleanField(default=False)
 
-    def delete(self, *args, **kwargs):
-        self.img.delete()
-        super().delete(*args, **kwargs)
-
 
 class Comments(models.Model):
     author = models.CharField(max_length=30)
