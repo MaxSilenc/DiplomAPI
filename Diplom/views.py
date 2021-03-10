@@ -606,7 +606,36 @@ def like(request):
 
 @api_view(['POST', 'PUT'])
 def reg(request):
+
     if request.method == 'POST':
+        try:
+            key = request.POST['key']
+        except:
+            key = None
+
+        if key is not None:
+            if Token.objects.get(key=request.POST['key']).user.is_staff == True:
+
+                all_users = User.objects.all()
+
+                return_arr = []
+
+                for item in all_users:
+                    return_arr.append({
+                        'login': item.username,
+                        'email': item.email,
+                        'userId': item.id,
+                        'name': item.first_name,
+                        'lastName': item.last_name,
+                        'status': item.is_staff,
+                    })
+
+                return Response({'keyError': 0, 'messages': 'Nice!', 'users': return_arr})
+
+            else:
+                Response({'keyError': 1, 'messages': 'You are bad dude!'})
+
+
         try:
             user = User.objects.get(username=request.POST['login'])
         except:
@@ -619,7 +648,6 @@ def reg(request):
 
         pattern = r'[a-zA-Z0-9,. ]+$'
         number_re = re.compile(pattern)
-
 
         if user is not None:
             return Response({'keyError': 1, 'messages': 'User with this username already exist!'})
@@ -636,55 +664,67 @@ def reg(request):
             new_user = User()
             new_user.username = request.POST['login']
             new_user.email = request.POST['email']
+            new_user.first_name = request.POST['name']
+            new_user.last_name = request.POST['lastName']
+            new_user.email = request.POST['email']
             new_user.set_password(request.POST['password'])
+
+            if request.POST['status'] == '1':
+                new_user.is_staff = True
+
             new_user.save()
             Token.objects.create(user=new_user)
             return Response({'keyError': 0, 'messages': 'Registered successfully'})
 
     if request.method == 'PUT':
-        try:
+        if request.POST['whatToDo'] == 'update':
+            try:
+                curr_user = User.objects.get(id=request.POST['id'])
+            except:
+                curr_user = None
+
+            if curr_user is not None:
+                if request.POST['login'] != '':
+                    try:
+                        user = User.objects.get(username=request.POST['login'])
+                    except:
+                        user = None
+
+                    if user is not None:
+                        if user.id == request.POST['id']:
+                            return Response({'keyError': 0, 'messages': 'successfully'})
+                        else:
+                            return Response({'keyError': 2, 'messages': 'User with this username already exist!'})
+                    else:
+                        curr_user.username = request.POST['login']
+                        curr_user.save()
+                if request.POST['email'] != '':
+                    try:
+                        user = User.objects.get(email=request.POST['email'])
+                    except:
+                        user = None
+
+                    if user is not None:
+                        if user.id == request.POST['id']:
+                            return Response({'keyError': 0, 'messages': 'successfully'})
+                        else:
+                            return Response({'keyError': 3, 'messages': 'User with this email already exist!'})
+                    else:
+                        curr_user.email = request.POST['email']
+                        curr_user.save()
+                if request.POST['name'] != '':
+                    curr_user.first_name = request.POST['name']
+                    curr_user.save()
+                if request.POST['lastName'] != '':
+                    curr_user.last_name = request.POST['lastName']
+                    curr_user.save()
+                return Response({'keyError': 0, 'messages': 'successfully'})
+            else:
+                return Response({'keyError': 1, 'messages': 'No users with this ID!'})
+        if request.POST['whatToDo'] == 'delete':
             curr_user = User.objects.get(id=request.POST['id'])
-        except:
-            curr_user = None
-
-        if curr_user is not None:
-            if request.POST['login'] != '':
-                try:
-                    user = User.objects.get(username=request.POST['login'])
-                except:
-                    user = None
-
-                if user is not None:
-                    if user.id == request.POST['id']:
-                        return Response({'keyError': 0, 'messages': 'successfully'})
-                    else:
-                        return Response({'keyError': 2, 'messages': 'User with this username already exist!'})
-                else:
-                    curr_user.username = request.POST['login']
-                    curr_user.save()
-            if request.POST['email'] != '':
-                try:
-                    user = User.objects.get(email=request.POST['email'])
-                except:
-                    user = None
-
-                if user is not None:
-                    if user.id == request.POST['id']:
-                        return Response({'keyError': 0, 'messages': 'successfully'})
-                    else:
-                        return Response({'keyError': 3, 'messages': 'User with this email already exist!'})
-                else:
-                    curr_user.email = request.POST['email']
-                    curr_user.save()
-            if request.POST['name'] != '':
-                curr_user.first_name = request.POST['name']
-                curr_user.save()
-            if request.POST['lastName'] != '':
-                curr_user.last_name = request.POST['lastName']
-                curr_user.save()
-            return Response({'keyError': 0, 'messages': 'successfully'})
-        else:
-            return Response({'keyError': 1, 'messages': 'No users with this ID!'})
+            curr_user.delete()
+            return Response({'keyError': 0, 'messages': 'Nice!'})
 
 
 @api_view(['POST'])
