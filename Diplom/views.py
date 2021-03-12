@@ -515,6 +515,18 @@ def comments(request, id):
     if request.method == 'GET':
         all_items = Comments.objects.filter(project_id=id)
 
+        page = request.GET.get('page')
+        projects_paginator = Paginator(all_items, 10)
+
+        try:
+            comm = projects_paginator.page(page)
+        except PageNotAnInteger:
+            comm = projects_paginator.page(1)
+        except EmptyPage:
+            comm = projects_paginator.page(projects_paginator.num_pages)
+
+        justTest = 0
+
         returnArr = []
 
         for item in all_items:
@@ -527,6 +539,7 @@ def comments(request, id):
 
         comments = {
             "items": returnArr,
+            'count': len(all_items)
         }
         return Response(comments)
 
