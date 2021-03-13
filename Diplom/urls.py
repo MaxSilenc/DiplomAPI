@@ -34,4 +34,5 @@ urlpatterns = [
     path('chat/', views.chat),
     path('projectInWork/', views.project_in_work),
     path('emptyChats/', views.empty_chats),
+    path('statistics/', views.statistics),
 ]

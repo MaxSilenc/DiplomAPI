@@ -983,4 +983,71 @@ def empty_chats(request):
         return Response({'keyError': 0, 'messages': 'added admin!'})
 
 
+@api_view(['GET'])
+def statistics(request):
 
+    all_types = Type.objects.all()
+    all_directions = Theme.objects.all()
+    all_projects = Projects.objects.all()[:10]
+
+    types_list = []
+    types_likes_list = []
+    types_comments_list = []
+
+    directions_list = []
+    directions_likes_list = []
+    directions_comments_list = []
+
+    projects_list = []
+    projects_likes_list = []
+    projects_comments_list = []
+
+    for type in all_types:
+        projects = Projects.objects.filter(type=type.name)
+        likes_count = 0
+        comments_count = 0
+        for proj in projects:
+            likes = Like.objects.filter(project_id=proj.id)
+            likes_count += len(likes)
+            comments = Comments.objects.filter(project_id=proj.id)
+            comments_count += len(comments)
+        types_list.append(type.name)
+        types_likes_list.append(likes_count)
+        types_comments_list.append(comments_count)
+
+    for direction in all_directions:
+        projects = Projects.objects.filter(theme_id=direction.name)
+        likes_count = 0
+        comments_count = 0
+        for proj in projects:
+            likes = Like.objects.filter(project_id=proj.id)
+            likes_count += len(likes)
+            comments = Comments.objects.filter(project_id=proj.id)
+            comments_count += len(comments)
+        directions_list.append(direction.name)
+        directions_likes_list.append(likes_count)
+        directions_comments_list.append(comments_count)
+
+    for item in all_projects:
+        likes = Like.objects.filter(project_id=item.id)
+        comments = Comments.objects.filter(project_id=item.id)
+        projects_list.append(item.headline_name)
+        projects_likes_list.append(len(likes))
+        projects_comments_list.append(len(comments))
+
+    return Response({'keyError': 0, 'messages': 'nice!',
+                     'types': {
+                         'name': types_list,
+                         'likes': types_likes_list,
+                         'comments': types_comments_list
+                     },
+                     'direction': {
+                         'name': directions_list,
+                         'likes': directions_likes_list,
+                         'comments': directions_comments_list
+                     },
+                     'projects': {
+                         'name': projects_list,
+                         'likes': projects_likes_list,
+                         'comments': projects_comments_list
+                     }})
